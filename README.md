@@ -23,8 +23,8 @@ La información se administra durante la ejecución utilizando objetos y listas 
 - Comunicar errores de dominio mediante excepciones personalizadas.
 - Registrar eventos relevantes y errores en archivos dentro de `src/logs/`.
 - Mantener la aplicación operativa cuando una entrada o una operación falle.
-- Integrar las funciones en un menú de consola y demostrar al menos diez
-  operaciones completas, exitosas y fallidas.
+- Integrar las funciones en una interfaz gráfica con Tkinter y demostrar al
+  menos diez operaciones completas, exitosas y fallidas.
 
 ## Alcance funcional
 
@@ -56,18 +56,37 @@ las transiciones permitidas y ofrecer operaciones para crear, confirmar, cancela
 
 Debe generar error controlado: una transición no permitida, un dato inconsistente o un servicio no disponible y debe quedar registrado cuando corresponda.
 
+### Inicio de sesión
+
+`src/inicio/inicio_sesion.py` contiene las clases `Usuario` e `InicioSesion` y la
+función `Abrir_Ventana_Inicio_Sesion()`. La función crea la ventana de acceso,
+ejecuta su bucle de eventos y devuelve `True` si las credenciales se validaron
+correctamente o `False` si se cerró el login sin iniciar sesión.
+
+Las credenciales de demostración definidas actualmente son:
+
+- Usuario: `SoftwareFJ`
+- Contraseña: `SoftwareFJ`
+
+Si las credenciales son incorrectas, el mensaje se muestra en la misma ventana
+para permitir otro intento. Si son correctas, se muestra el mensaje de éxito y,
+después de dos segundos, se destruye la ventana de inicio de sesión.
+
 ### Menú e integración
 
-src/main.py será el punto de entrada de la aplicación y permitirá acceder, mediante una interfaz gráfica sencilla, a las principales funciones del sistema:
+`src/main.py` es el punto de entrada de la aplicación. La clase
+`Programa_SoftwareFJ` llama a `Abrir_Ventana_Inicio_Sesion()`. Si esta devuelve
+`True`, crea una nueva ventana raíz de Tkinter para el sistema; si devuelve
+`False`, no abre la ventana principal.
 
-- Gestión de clientes.
-- Gestión de servicios.
-- Gestión de reservas.
-- Consulta de información y resultados de las operaciones.
+Actualmente, la ventana principal muestra el título y el subtítulo de Software
+FJ. La integración de las opciones de gestión de clientes, servicios y reservas
+está pendiente.
 
-La carpeta src/gestion/ tendrá la responsabilidad de coordinar los diferentes módulos del proyecto y mantener las listas internas de clientes, servicios y reservas.
-
-La interfaz deberá validar las entradas ingresadas por el usuario y permitir continuar utilizando el programa cuando se presenten errores recuperables.
+La carpeta `src/gestion/` tendrá la responsabilidad de coordinar los diferentes
+módulos del proyecto y mantener las listas internas de clientes, servicios y
+reservas. La interfaz deberá validar las entradas y permitir continuar
+utilizando el programa cuando ocurran errores recuperables.
 
 ### Registro y manejo de errores
 
@@ -83,7 +102,8 @@ Los errores no deben ocultarse ni convertirse en resultados que aparenten éxito
 Sistema-Gestion-Software-FJ/
 ├── src/
 │   ├── main.py
-│   │  
+│   ├── inicio/
+│   │   └── inicio_sesion.py
 │   ├── modelos/
 │   │   ├── __init__.py
 │   │   ├── entidad.py
@@ -102,7 +122,7 @@ Sistema-Gestion-Software-FJ/
 │   │   └── errores.py
 │   │
 │   ├── gestion/
-│   │   ├── __¿¿init__.py
+│   │   ├── __init__.py
 │   │   └── sistema.py
 │   │
 │   └── logs/
@@ -121,7 +141,9 @@ los datos del negocio en archivos.
 ```mermaid
 flowchart TB
     U[Usuario]
-    M["src/main.py<br/>Menú e interacción"]
+    M["src/main.py<br/>Programa_SoftwareFJ"]
+    I["inicio/inicio_sesion.py<br/>Usuario e InicioSesion"]
+    V["Ventana principal Tkinter"]
     G["gestion/sistema.py<br/>Coordinación y listas en memoria"]
     C["modelos/cliente.py<br/>Cliente"]
     E["modelos/entidad.py<br/>Entidad abstracta"]
@@ -133,8 +155,11 @@ flowchart TB
     X["excepciones/errores.py<br/>Excepciones de dominio"]
     L["logs/<br/>Eventos y errores"]
 
-    U -->|opción y datos| M
-    M -->|solicita operación| G
+    M -->|inicia| I
+    U -->|ingresa credenciales| I
+    I -->|devuelve resultado| M
+    M -->|si el acceso es exitoso| V
+    V -->|solicita operaciones| G
     G -->|crea, consulta y administra| C
     G -->|crea, consulta y administra| R
     G -->|selecciona e invoca| S
@@ -145,7 +170,7 @@ flowchart TB
     R -->|asocia| C
     R -->|utiliza| S
     G -->|captura errores del dominio| X
-    M -->|presenta resultado o error| U
+    V -->|presenta resultado o error| U
     G -. registra eventos y errores .-> L
     X -. errores registrados .-> L
 ```
@@ -154,37 +179,47 @@ flowchart TB
 
 ```mermaid
 flowchart TD
-    A([Inicio]) --> B["src/main.py: mostrar menú"]
-    B --> C["Leer opción y datos"]
-    C --> D{"¿Entrada válida?"}
-    D -->|No| E["Informar validación fallida"]
-    E --> F["Registrar evento/error"]
-    F --> B
-    D -->|Sí| G["Enviar solicitud a SistemaGestion"]
-    G --> H{"Tipo de operación"}
-    H -->|Cliente| I["Validar y operar sobre Cliente"]
-    H -->|Servicio| J["Seleccionar servicio especializado"]
-    H -->|Reserva| K["Validar cliente, servicio y estado"]
-    J --> L["Calcular costo / describir / validar parámetros"]
-    I --> M{"¿Operación correcta?"}
-    L --> M
-    K --> N{"¿Transición permitida y servicio disponible?"}
-    N -->|Sí| O["Crear, confirmar, procesar o cancelar reserva"]
-    N -->|No| P["Lanzar excepción de dominio"]
-    O --> M
-    M -->|Sí| Q["Actualizar listas y estado en memoria"]
-    Q --> R["Registrar evento y presentar resultado"]
-    M -->|No| P
-    P --> S["Capturar excepción y conservar contexto"]
-    S --> T["Registrar error y comunicar fallo"]
-    R --> U{"¿Salir del sistema?"}
-    T --> U
-    U -->|No| B
-    U -->|Sí| V([Fin])
+    A([Inicio]) --> B["src/main.py: ejecutar Programa_SoftwareFJ"]
+    B --> I["Abrir ventana de inicio de sesión"]
+    I --> C["Ingresar usuario y contraseña"]
+    C --> D{"¿Credenciales correctas?"}
+    D -->|No| E["Mostrar error y permitir otro intento"]
+    E --> C
+    D -->|Sí| F["Destruir ventana de inicio de sesión y devolver True"]
+    F --> G["Crear nueva ventana principal"]
+    G --> H["Mostrar menú de gestión cuando esté integrado"]
+    H --> J["Leer opción y datos"]
+    J --> K{"¿Entrada válida?"}
+    K -->|No| L["Informar validación fallida y permitir corregir"]
+    L --> H
+    K -->|Sí| M["Enviar solicitud a SistemaGestion"]
+    M --> N{"Tipo de operación"}
+    N -->|Cliente| O["Validar y operar sobre Cliente"]
+    N -->|Servicio| P["Seleccionar servicio especializado"]
+    N -->|Reserva| Q["Validar cliente, servicio y estado"]
+    P --> R["Calcular costo, describir o validar parámetros"]
+    O --> S{"¿Operación correcta?"}
+    R --> S
+    Q --> T{"¿Transición permitida y servicio disponible?"}
+    T -->|Sí| U["Crear, confirmar, procesar o cancelar reserva"]
+    T -->|No| W["Lanzar excepción de dominio"]
+    U --> S
+    S -->|Sí| X["Actualizar listas y estado en memoria"]
+    X --> Y["Registrar evento y presentar resultado"]
+    S -->|No| W
+    W --> Z["Capturar excepción, registrar y comunicar error"]
+    Y --> AA{"¿Salir del sistema?"}
+    Z --> AA
+    AA -->|No| H
+    AA -->|Sí| AB([Fin])
 ```
 
 Los clientes, servicios y reservas viven en las colecciones del sistema durante la ejecución. Los archivos de `src/logs/` guardan únicamente trazas de eventos y errores relevantes: no son una base de datos ni una fuente de persistencia del negocio. Cuando una operación falla, no debe dejar cambios parciales en las
 listas o en el estado de una reserva.
+
+El flujo de gestión posterior al inicio de sesión representa el alcance previsto
+del sistema. Las opciones de clientes, servicios y reservas todavía deben
+integrarse en la ventana principal.
 
 
 ## Distribución del trabajo y responsabilidades
@@ -274,7 +309,11 @@ La aplicación debe ejecutarse desde el directorio raíz del proyecto con Python
 python src/main.py
 ```
 
-Al iniciar, se mostrará una interfaz gráfica sencilla desde la cual se podrá acceder a las funciones principales de clientes, servicios y reservas.
+Al iniciar, se mostrará la ventana de inicio de sesión. Para probar el acceso,
+utiliza el usuario y la contraseña de demostración indicados anteriormente. Si
+el acceso es exitoso, el login se destruye y se abre una nueva ventana de
+Software FJ. Por ahora esta ventana presenta el título y el subtítulo del
+sistema; las opciones de gestión están pendientes de integración.
 
 El proyecto no utiliza base de datos. La información de clientes, servicios y reservas permanece en memoria durante la ejecución del programa.
 
@@ -297,6 +336,10 @@ Los archivos de log no se utilizarán como base de datos ni como mecanismo para 
 
 - [ ] La arquitectura incluye las clases abstractas, derivadas y módulos
   descritos.
+- [ ] El inicio de sesión permite reintentar si las credenciales son incorrectas
+  y devuelve el resultado de la validación al programa principal.
+- [ ] Tras un inicio de sesión exitoso, se destruye la ventana de login y se
+  crea la ventana principal.
 - [ ] Los datos y las operaciones tienen validaciones estrictas.
 - [ ] Los servicios aplican polimorfismo en sus comportamientos específicos.
 - [ ] Las reservas controlan estados y transiciones permitidas.
