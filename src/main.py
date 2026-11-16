@@ -18,7 +18,6 @@ import tkinter as tk
 # Se importa la función que muestra el inicio de sesión.
 from inicio.inicio_sesion import Abrir_Ventana_Inicio_Sesion
 
-
 # ===========================================================================================
 #                       PROGRAMA PRINCIPAL
 # ===========================================================================================
