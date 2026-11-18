@@ -1,6 +1,11 @@
 """Modelo y ciclo de vida de las reservas."""
 
-import excepciones
+from excepciones import (
+    ErrorOperacionNoPermitida,
+    ErrorParametroFaltante,
+    ErrorReservaIncorrecta,
+    SoftwareFJExcepcion,
+)
 
 
 class Reserva:
