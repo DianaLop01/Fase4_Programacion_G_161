@@ -17,6 +17,11 @@ import tkinter as tk
 
 # Se importa la función que muestra el inicio de sesión.
 from inicio.inicio_sesion import Abrir_Ventana_Inicio_Sesion
+from reservas.interfaz import PanelReservas 
+
+
+
+
 
 # Se importa la función que muestra la interfaz de clientes.
 from clientes.interfaz import Abrir_Ventana_Clientes
