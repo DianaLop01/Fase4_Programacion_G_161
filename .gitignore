@@ -2,3 +2,5 @@ __pycache__/
 *.pyc
 src/logs/*
 !src/logs/.gitkeep
+Checklist_Cumplimiento_Anexo_3.docx
+Checklist_Cumplimiento_Anexo_3.md
