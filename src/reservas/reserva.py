@@ -21,11 +21,17 @@ class Reserva:
         logger=None,
     ):
         if not identificador or not identificador.strip():
-            raise excepciones.ErrorParametrofaltante("El identificador de la reserva no puede estar vacío.")
+            raise ErrorParametroFaltante(
+                "El identificador de la reserva no puede estar vacío."
+            )
         if cliente is None or servicio is None:
-            raise excepciones.ErrorReservaIncorrecta("Debe asociar un cliente y un servicio válidos.")
+            raise ErrorReservaIncorrecta(
+                "Debe asociar un cliente y un servicio válidos."
+            )
         if not isinstance(duracion, int) or duracion <= 0:
-            raise excepciones.ErrorReservaIncorrecta("La duración de la reserva debe ser un número entero positivo.")
+            raise ErrorReservaIncorrecta(
+                "La duración de la reserva debe ser un número entero positivo."
+            )
 
         self._identificador = identificador.strip()
         self.cliente = cliente
@@ -43,7 +49,9 @@ class Reserva:
     @identificador.setter
     def identificador(self, valor):
         if not valor or not str(valor).strip():
-            raise excepciones.ErrorParametrofaltante("El identificador de la reserva no puede estar vacío.")
+            raise ErrorParametroFaltante(
+                "El identificador de la reserva no puede estar vacío."
+            )
         self._identificador = str(valor).strip()
 
     def _log(self, nivel: str, mensaje: str):
@@ -55,12 +63,12 @@ class Reserva:
             return 0.0
         try:
             return self.servicio.calcular_costo(self.duracion, self.descuento)
-        except excepciones.SoftwareFJExcepcion as e:
-            raise excepciones.ErrorReservaIncorrecta(
+        except SoftwareFJExcepcion as e:
+            raise ErrorReservaIncorrecta(
                 f"No se pudo calcular el costo de la reserva {self.identificador}: {e}"
             ) from e
         except Exception as e:
-            raise excepciones.ErrorReservaIncorrecta(
+            raise ErrorReservaIncorrecta(
                 f"Error inesperado al calcular el costo de la reserva {self.identificador}: {e}"
             ) from e
 
@@ -69,21 +77,23 @@ class Reserva:
         try:
             self._log("INFO", f"iniciando procesamiento de la reserva {self.identificador}.")
             if self.estado == "cancelada":
-                raise excepciones.ErrorOperacionNoPermitida("No se puede procesar una reserva cancelada.")
+                raise ErrorOperacionNoPermitida(
+                    "No se puede procesar una reserva cancelada."
+                )
 
             self.costo_total = self.servicio.calcular_costo(self.duracion, self.descuento)
             self.estado = "procesada"
 
-        except excepciones.SoftwareFJExcepcion as e:
+        except SoftwareFJExcepcion as e:
             self.estado = "fallida"
             self._log("ERROR", f"fallo controlado en reserva {self.identificador}: {e}")
-            raise excepciones.ErrorReservaIncorrecta(
+            raise ErrorReservaIncorrecta(
                 f"no se pudo procesar la reserva {self.identificador}: {e}"
             ) from e
         except Exception as e:
             self.estado = "fallida"
             self._log("ERROR_CRITICO", f"Error inesperado en reserva {self.identificador}: {e}")
-            raise excepciones.ErrorReservaIncorrecta(
+            raise ErrorReservaIncorrecta(
                 f"Error inesperado al procesar la reserva {self.identificador}: {e}"
             ) from e
         else:
@@ -99,7 +109,7 @@ class Reserva:
 
     def confirmar(self):
         if self.estado != "procesada":
-            raise excepciones.ErrorOperacionNoPermitida(
+            raise ErrorOperacionNoPermitida(
                 f"Solo se pueden confirmar reservas procesadas (estado actual: {self.estado})."
             )
         self.estado = "confirmada"
@@ -107,7 +117,7 @@ class Reserva:
 
     def cancelar(self):
         if self.estado == "cancelada":
-            raise excepciones.ErrorOperacionNoPermitida("La reserva ya está cancelada.")
+            raise ErrorOperacionNoPermitida("La reserva ya está cancelada.")
         self.estado = "cancelada"
         self._log("INFO", f"reserva {self.identificador} cancelada.")
 

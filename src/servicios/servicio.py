@@ -51,6 +51,27 @@ class Servicio(ABC):
     def Calcular_Costo(self):
         pass
 
+    # Calcula el costo de una reserva aplicando duración y descuento porcentual.
+
+    def calcular_costo(self, duracion, descuento=0.0):
+
+        if not isinstance(duracion, int) or isinstance(duracion, bool) or duracion <= 0:
+            raise DatosServicioInvalidos(
+                "La duración de la reserva debe ser un entero positivo."
+            )
+
+        if (
+            not isinstance(descuento, (int, float))
+            or isinstance(descuento, bool)
+            or not 0 <= descuento < 100
+        ):
+            raise DatosServicioInvalidos(
+                "El descuento debe ser un porcentaje entre 0 y menos de 100."
+            )
+
+        costo_base = self.Calcular_Costo()
+        return costo_base * duracion * (1 - descuento / 100)
+
     # ---------------------------------------------------------------------------------------
     #       METODO PARA MOSTRAR LA INFORMACION
     # ---------------------------------------------------------------------------------------

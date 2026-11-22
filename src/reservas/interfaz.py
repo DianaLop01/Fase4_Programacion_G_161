@@ -159,7 +159,7 @@ class PanelReservas(tk.Frame):
             f"{c.identificador} - {c.nombre}" for c in self.clientes
         ]
         valores_servicios = [
-            f"{s.identificador} - {s.nombre}" for s in self.servicios
+            f"{s.codigo} - {s.nombre}" for s in self.servicios
         ]
         self.cmb_cliente["values"] = valores_clientes
         self.cmb_servicio["values"] = valores_servicios
@@ -185,6 +185,7 @@ class PanelReservas(tk.Frame):
             self.listbox_reservas.insert(tk.END, res.obtener_detalles())
 
     def crear_y_procesar_reserva(self):
+        creada = False
         try:
             if not self.cmb_cliente.get() or not self.cmb_servicio.get():
                 raise ErrorParametroFaltante(
@@ -202,7 +203,7 @@ class PanelReservas(tk.Frame):
                     "Duración y descuento deben ser valores numéricos."
                 )
 
-            nueva_reserva = reserva.Reserva(
+            nueva_reserva = Reserva(
                 identificador=self.ent_id.get().strip(),
                 cliente=cliente,
                 servicio=servicio,
@@ -224,7 +225,7 @@ class PanelReservas(tk.Frame):
             self.ent_descuento.delete(0, tk.END)
             self.ent_descuento.insert(0, "0")
 
-        except softwarefjexcepcion as e:
+        except SoftwareFJExcepcion as e:
             messagebox.showerror("Error al crear reserva", str(e))
         except (TypeError, ValueError, AttributeError) as e:
             messagebox.showerror("Error al crear reserva", str(e))
@@ -251,7 +252,7 @@ class PanelReservas(tk.Frame):
                 "Confirmada",
                 f"La reserva {reserva_seleccionada.identificador} ha sido confirmada exitosamente.",
             )
-        except softwarefjexcepcion as e:
+        except SoftwareFJExcepcion as e:
             messagebox.showerror("Operación no permitida", str(e))
         except (IndexError, AttributeError, TypeError):
             messagebox.showerror("Operación no permitida", "La reserva seleccionada ya no está disponible.")
@@ -273,7 +274,7 @@ class PanelReservas(tk.Frame):
                 "Cancelada",
                 f"La reserva {reserva_seleccionada.identificador} ha sido cancelada exitosamente.",
             )
-        except softwarefjexcepcion as e:
+        except SoftwareFJExcepcion as e:
             messagebox.showerror("Operación no permitida", str(e))
         except (IndexError, AttributeError, TypeError):
             messagebox.showerror("Operación no permitida", "La reserva seleccionada ya no está disponible.")
