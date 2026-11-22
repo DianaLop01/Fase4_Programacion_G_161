@@ -18,6 +18,9 @@ import tkinter as tk
 # Se importa la función que muestra el inicio de sesión.
 from inicio.inicio_sesion import Abrir_Ventana_Inicio_Sesion
 
+# Se importa la función que muestra la interfaz de clientes.
+from clientes.interfaz import Abrir_Ventana_Clientes
+
 # ===========================================================================================
 #                       PROGRAMA PRINCIPAL
 # ===========================================================================================
@@ -56,10 +59,28 @@ class Programa_SoftwareFJ:
             text = "Sistema Integral de Gestión de Clientes, Servicios y Reservas",
             font = ("arial", 14)).pack(pady = 10)
 
-# Aquí se integrarán las opciones para gestionar clientes, servicios y reservas.
+# Se crea el botón que permite abrir la interfaz de clientes.
+        tk.Button(
+            self.ventana_principal,
+            text = "Clientes",
+            width = 20,
+            command = self.Abrir_Interfaz_Clientes
+        ).pack(pady = 10)
+
+# Aquí se integrarán las opciones para gestionar servicios y reservas.
 
 # Se mantiene activa la nueva ventana principal.
         self.ventana_principal.mainloop()
+
+
+# ---------------------------------------------------------------------------------------
+#       MÉTODO PARA ABRIR LA INTERFAZ DE CLIENTES
+# ---------------------------------------------------------------------------------------
+
+# Recibe la ventana principal y abre la interfaz de clientes como ventana secundaria.
+
+    def Abrir_Interfaz_Clientes(self):
+        Abrir_Ventana_Clientes(self.ventana_principal)
 
 
 # ---------------------------------------------------------------------------------------
