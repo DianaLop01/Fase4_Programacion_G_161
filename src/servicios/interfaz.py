@@ -30,7 +30,7 @@ class InterfazServicios:
     #       METODO CONSTRUCTOR
     # ---------------------------------------------------------------------------------------
 
-    def __init__(self, ventana_principal):
+    def __init__(self, ventana_principal, lista_servicios=None):
 
         self.ventana = tk.Toplevel(ventana_principal)
 
@@ -39,8 +39,12 @@ class InterfazServicios:
         self.ventana.geometry("750x650")
         self.ventana.resizable(False, False)
 
-        # Lista para almacenar los servicios registrados.
-        self.servicios_registrados = []
+        # Se usa la lista compartida para que reservas consulten los servicios.
+        self.servicios_registrados = (
+            [] if lista_servicios is None else lista_servicios
+        )
+        if not isinstance(self.servicios_registrados, list):
+            raise TypeError("lista_servicios debe ser una lista.")
 
         # Se crean los elementos de la interfaz.
         self.Crear_Interfaz()

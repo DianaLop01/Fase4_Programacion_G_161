@@ -18,10 +18,12 @@ import tkinter as tk
 
 # Se importa la función que muestra el inicio de sesión.
 from inicio.inicio_sesion import Abrir_Ventana_Inicio_Sesion
-
+# Se importa la función que muestra las reservas.
+from reservas.interfaz import PanelReservas
+# Se importa la función que muestra la interfaz de clientes.
+from clientes.interfaz import Abrir_Ventana_Clientes
 # Se importa la interfaz del modulo de servicios.
 from servicios.interfaz import InterfazServicios
-
 
 # ===========================================================================================
 #                       PROGRAMA PRINCIPAL
@@ -33,6 +35,10 @@ class Programa_SoftwareFJ:
     # Se inicializa el programa y se abre la ventana principal.
     def __init__(self):
         self.ventana_principal = None
+        self.clientes = []
+        self.servicios = []
+        self.reservas = []
+
 
 # ---------------------------------------------------------------------------------------
 #       MÉTODO PARA ABRIR LA VENTANA PRINCIPAL
@@ -65,11 +71,18 @@ class Programa_SoftwareFJ:
             font=("Arial", 14)
         ).pack(pady=10)
 
-        # -------------------------------------------------------------------------------
-        #       BOTÓN PARA INGRESAR AL MÓDULO DE SERVICIOS
-        # -------------------------------------------------------------------------------
+        # Se crea el botón para abrir la interfaz de clientes.
+        tk.Button(
+            self.ventana_principal,
+            text="Clientes",
+            font=("Arial", 12, "bold"),
+            bg="blue",
+            fg="white",
+            width=25,
+            command=self.Abrir_Interfaz_Clientes
+        ).pack(pady=10)
 
-        # Se abre la interfaz de servicios en una ventana secundaria.
+        # Se crea el botón para abrir la interfaz de servicios.
         tk.Button(
             self.ventana_principal,
             text="Gestionar Servicios",
@@ -78,10 +91,18 @@ class Programa_SoftwareFJ:
             fg="white",
             width=25,
             command=self.Abrir_Modulo_Servicios
-        ).pack(pady=20)
+        ).pack(pady=10)
 
-        # Aquí se integrarán posteriormente las opciones para gestionar clientes
-        # y reservas del sistema.
+        # Se crea el botón para abrir la interfaz de reservas.
+        tk.Button(
+            self.ventana_principal,
+            text="Gestionar Reservas",
+            font=("Arial", 12, "bold"),
+            bg="orange",
+            fg="white",
+            width=25,
+            command=self.Abrir_Modulo_Reservas
+        ).pack(pady=10)
 
         # Se mantiene activa la ventana principal.
         self.ventana_principal.mainloop()
@@ -91,12 +112,42 @@ class Programa_SoftwareFJ:
 #       MÉTODO PARA ABRIR EL MÓDULO DE SERVICIOS
 # ---------------------------------------------------------------------------------------
 
-# Se crea una instancia de la interfaz de servicios.
-# La ventana principal permanece abierta mientras se utiliza el módulo.
+# Se abre la interfaz de servicios usando la lista compartida del programa.
 
     def Abrir_Modulo_Servicios(self):
+        InterfazServicios(self.ventana_principal, self.servicios)
 
-        InterfazServicios(self.ventana_principal)
+# ---------------------------------------------------------------------------------------
+#       MÉTODO PARA ABRIR EL MÓDULO DE CLIENTES
+# ---------------------------------------------------------------------------------------
+
+# Se comparte la lista de clientes y reservas con la interfaz de clientes.
+
+    def Abrir_Interfaz_Clientes(self):
+        Abrir_Ventana_Clientes(
+            self.ventana_principal,
+            self.clientes,
+            self.reservas,
+        )
+
+# ---------------------------------------------------------------------------------------
+#       MÉTODO PARA ABRIR EL MÓDULO DE RESERVAS
+# ---------------------------------------------------------------------------------------
+
+# Se crea una ventana secundaria y se comparten las listas necesarias.
+
+    def Abrir_Modulo_Reservas(self):
+        ventana_reservas = tk.Toplevel(self.ventana_principal)
+        ventana_reservas.title("Gestión de Reservas - Software FJ")
+        ventana_reservas.geometry("900x600")
+
+        panel_reservas = PanelReservas(
+            ventana_reservas,
+            self.clientes,
+            self.servicios,
+            self.reservas,
+        )
+        panel_reservas.pack(fill="both", expand=True)
 
 
 # ---------------------------------------------------------------------------------------
