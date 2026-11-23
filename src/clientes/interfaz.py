@@ -25,7 +25,6 @@ from clientes.excepciones import (
     ErrorClienteDuplicado,
     ErrorClienteNoEncontrado,
     ErrorDatoClienteInvalido,
-    ErrorIdentificacionClienteInvalida,
 )
 
 logger = logging.getLogger(__name__)
@@ -112,6 +111,21 @@ class InterfazClientes(tk.Frame):
 
     def _Crear_Formulario(self):
 
+        self.etiquetas_requeridas = {}
+        self.entradas_requeridas = {}
+        estilo = ttk.Style(self)
+        estilo.configure(
+            "CampoInvalido.TCombobox",
+            fieldbackground = "#ffe6e6",
+        )
+        estilo.map(
+            "CampoInvalido.TCombobox",
+            fieldbackground = [
+                ("readonly", "#ffe6e6"),
+                ("!disabled", "#ffe6e6"),
+            ],
+        )
+
 # Se crea el título principal del formulario.
         tk.Label(
             self,
@@ -130,11 +144,14 @@ class InterfazClientes(tk.Frame):
 # -----------------------------------------------------------------------------------
 
 # Campo para seleccionar el tipo de documento.
-        tk.Label(
+        self.etiquetas_requeridas["tipo_documento"] = tk.Label(
             formulario,
-            text = "Tipo de documento:",
+            text = "Tipo de documento *:",
             font = ("arial", 10, "bold")
-        ).grid(row = 0, column = 0, sticky = "w", pady = (8, 2))
+        )
+        self.etiquetas_requeridas["tipo_documento"].grid(
+            row = 0, column = 0, sticky = "w", pady = (8, 2)
+        )
 
         self.cmb_tipo_documento = ttk.Combobox(
             formulario,
@@ -150,13 +167,17 @@ class InterfazClientes(tk.Frame):
             )
         )
         self.cmb_tipo_documento.grid(row = 1, column = 0, sticky = "w")
+        self.entradas_requeridas["tipo_documento"] = self.cmb_tipo_documento
 
 # Campo para ingresar el número de documento.
-        tk.Label(
+        self.etiquetas_requeridas["documento"] = tk.Label(
             formulario,
-            text = "Documento:",
+            text = "Documento *:",
             font = ("arial", 10, "bold")
-        ).grid(row = 0, column = 2, sticky = "w", pady = (8, 2))
+        )
+        self.etiquetas_requeridas["documento"].grid(
+            row = 0, column = 2, sticky = "w", pady = (8, 2)
+        )
 
         self.txt_documento = tk.Entry(
             formulario,
@@ -164,6 +185,7 @@ class InterfazClientes(tk.Frame):
             width = 30
         )
         self.txt_documento.grid(row = 1, column = 2, sticky = "w")
+        self.entradas_requeridas["documento"] = self.txt_documento
         self.txt_documento.bind(
             "<Return>", lambda evento: self.Buscar_Cliente()
         )
@@ -174,17 +196,23 @@ class InterfazClientes(tk.Frame):
 # -----------------------------------------------------------------------------------
 
 # Campo para ingresar el primer nombre.
-        tk.Label(
+        self.etiquetas_requeridas["primer_nombre"] = tk.Label(
             formulario,
-            text = "Primer nombre:",
+            text = "Primer nombre *:",
             font = ("arial", 10, "bold")
-        ).grid(row = 2, column = 0, sticky = "w", pady = (8, 2))
+        )
+        self.etiquetas_requeridas["primer_nombre"].grid(
+            row = 2, column = 0, sticky = "w", pady = (8, 2)
+        )
 
-        tk.Entry(
+        self.entradas_requeridas["primer_nombre"] = tk.Entry(
             formulario,
             textvariable = self.primer_nombre,
             width = 30
-        ).grid(row = 3, column = 0, sticky = "w")
+        )
+        self.entradas_requeridas["primer_nombre"].grid(
+            row = 3, column = 0, sticky = "w"
+        )
 
 # Campo opcional para ingresar el segundo nombre.
         tk.Label(
@@ -205,17 +233,23 @@ class InterfazClientes(tk.Frame):
 # -----------------------------------------------------------------------------------
 
 # Campo para ingresar el primer apellido.
-        tk.Label(
+        self.etiquetas_requeridas["primer_apellido"] = tk.Label(
             formulario,
-            text = "Primer apellido:",
+            text = "Primer apellido *:",
             font = ("arial", 10, "bold")
-        ).grid(row = 4, column = 0, sticky = "w", pady = (8, 2))
+        )
+        self.etiquetas_requeridas["primer_apellido"].grid(
+            row = 4, column = 0, sticky = "w", pady = (8, 2)
+        )
 
-        tk.Entry(
+        self.entradas_requeridas["primer_apellido"] = tk.Entry(
             formulario,
             textvariable = self.primer_apellido,
             width = 30
-        ).grid(row = 5, column = 0, sticky = "w")
+        )
+        self.entradas_requeridas["primer_apellido"].grid(
+            row = 5, column = 0, sticky = "w"
+        )
 
 # Campo opcional para ingresar el segundo apellido.
         tk.Label(
@@ -236,23 +270,38 @@ class InterfazClientes(tk.Frame):
 # -----------------------------------------------------------------------------------
 
 # Campo para ingresar la fecha de nacimiento.
-        tk.Label(
+        self.etiquetas_requeridas["fecha_nacimiento"] = tk.Label(
             formulario,
-            text = "Fecha de nacimiento:",
+            text = "Fecha de nacimiento *:",
             font = ("arial", 10, "bold")
-        ).grid(row = 6, column = 0, sticky = "w", pady = (10, 2))
+        )
+        self.etiquetas_requeridas["fecha_nacimiento"].grid(
+            row = 6, column = 0, sticky = "w", pady = (10, 2)
+        )
 
 # Se utiliza un contenedor para organizar el año, el mes y el día.
         fecha_nacimiento = tk.Frame(formulario)
         fecha_nacimiento.grid(row = 7, column = 0, sticky = "w")
 
-# Se indican la cantidad de espacios que corresponden a cada parte.
-        tk.Label(fecha_nacimiento, text = "Año (4)").grid(
-            row = 0, column = 0, sticky = "w")
-        tk.Label(fecha_nacimiento, text = "Mes (2)").grid(
-            row = 0, column = 1, padx = (8, 0), sticky = "w")
-        tk.Label(fecha_nacimiento, text = "Día (2)").grid(
-            row = 0, column = 2, padx = (8, 0), sticky = "w")
+# Se indica el formato esperado para cada parte de la fecha.
+        self.etiquetas_requeridas["anio_nacimiento"] = tk.Label(
+            fecha_nacimiento, text = "Año (AAAA) *"
+        )
+        self.etiquetas_requeridas["anio_nacimiento"].grid(
+            row = 0, column = 0, sticky = "w"
+        )
+        self.etiquetas_requeridas["mes_nacimiento"] = tk.Label(
+            fecha_nacimiento, text = "Mes (MM) *"
+        )
+        self.etiquetas_requeridas["mes_nacimiento"].grid(
+            row = 0, column = 1, padx = (8, 0), sticky = "w"
+        )
+        self.etiquetas_requeridas["dia_nacimiento"] = tk.Label(
+            fecha_nacimiento, text = "Día (DD) *"
+        )
+        self.etiquetas_requeridas["dia_nacimiento"].grid(
+            row = 0, column = 2, padx = (8, 0), sticky = "w"
+        )
 
 # Cuadro para ingresar el año con cuatro espacios.
         self.txt_anio_nacimiento = tk.Entry(
@@ -262,6 +311,7 @@ class InterfazClientes(tk.Frame):
             justify = "center"
         )
         self.txt_anio_nacimiento.grid(row = 1, column = 0)
+        self.entradas_requeridas["anio_nacimiento"] = self.txt_anio_nacimiento
 
 # Cuadro para ingresar el mes con dos espacios.
         self.txt_mes_nacimiento = tk.Entry(
@@ -271,6 +321,7 @@ class InterfazClientes(tk.Frame):
             justify = "center"
         )
         self.txt_mes_nacimiento.grid(row = 1, column = 1, padx = (8, 0))
+        self.entradas_requeridas["mes_nacimiento"] = self.txt_mes_nacimiento
 
 # Cuadro para ingresar el día con dos espacios.
         self.txt_dia_nacimiento = tk.Entry(
@@ -280,6 +331,7 @@ class InterfazClientes(tk.Frame):
             justify = "center"
         )
         self.txt_dia_nacimiento.grid(row = 1, column = 2, padx = (8, 0))
+        self.entradas_requeridas["dia_nacimiento"] = self.txt_dia_nacimiento
 
 # Se limita la cantidad de caracteres permitida en cada parte de la fecha.
         self.txt_anio_nacimiento.bind(
@@ -329,11 +381,14 @@ class InterfazClientes(tk.Frame):
 # -----------------------------------------------------------------------------------
 
 # Campo para seleccionar el género del cliente.
-        tk.Label(
+        self.etiquetas_requeridas["genero"] = tk.Label(
             formulario,
-            text = "Género:",
+            text = "Género *:",
             font = ("arial", 10, "bold")
-        ).grid(row = 8, column = 0, sticky = "w", pady = (10, 2))
+        )
+        self.etiquetas_requeridas["genero"].grid(
+            row = 8, column = 0, sticky = "w", pady = (10, 2)
+        )
 
         generos = tk.Frame(formulario)
         generos.grid(row = 9, column = 0, columnspan = 3, sticky = "w")
@@ -364,31 +419,43 @@ class InterfazClientes(tk.Frame):
 #       INFORMACIÓN DE CONTACTO
 # -----------------------------------------------------------------------------------
 
-# Campo para ingresar el teléfono.
-        tk.Label(
+# Campo para ingresar un teléfono de 7 a 15 dígitos.
+        self.etiquetas_requeridas["telefono"] = tk.Label(
             formulario,
-            text = "Teléfono:",
+            text = "Teléfono * (7 a 15 dígitos):",
             font = ("arial", 10, "bold")
-        ).grid(row = 10, column = 0, sticky = "w", pady = (10, 2))
+        )
+        self.etiquetas_requeridas["telefono"].grid(
+            row = 10, column = 0, sticky = "w", pady = (10, 2)
+        )
 
-        tk.Entry(
+        self.entradas_requeridas["telefono"] = tk.Entry(
             formulario,
             textvariable = self.telefono,
             width = 30
-        ).grid(row = 11, column = 0, sticky = "w")
+        )
+        self.entradas_requeridas["telefono"].grid(
+            row = 11, column = 0, sticky = "w"
+        )
 
-# Campo para ingresar el correo electrónico.
-        tk.Label(
+# Campo para ingresar un correo con arroba y punto.
+        self.etiquetas_requeridas["correo_electronico"] = tk.Label(
             formulario,
-            text = "Correo electrónico:",
+            text = "Correo electrónico * (requiere @ y punto):",
             font = ("arial", 10, "bold")
-        ).grid(row = 10, column = 2, sticky = "w", pady = (10, 2))
+        )
+        self.etiquetas_requeridas["correo_electronico"].grid(
+            row = 10, column = 2, sticky = "w", pady = (10, 2)
+        )
 
-        tk.Entry(
+        self.entradas_requeridas["correo_electronico"] = tk.Entry(
             formulario,
             textvariable = self.correo_electronico,
             width = 30
-        ).grid(row = 11, column = 2, sticky = "w")
+        )
+        self.entradas_requeridas["correo_electronico"].grid(
+            row = 11, column = 2, sticky = "w"
+        )
 
 
 # -----------------------------------------------------------------------------------
@@ -396,56 +463,89 @@ class InterfazClientes(tk.Frame):
 # -----------------------------------------------------------------------------------
 
 # Campo para ingresar el país de residencia.
-        tk.Label(
+        self.etiquetas_requeridas["pais_residencia"] = tk.Label(
             formulario,
-            text = "País de residencia:",
+            text = "País de residencia *:",
             font = ("arial", 10, "bold")
-        ).grid(row = 12, column = 0, sticky = "w", pady = (10, 2))
+        )
+        self.etiquetas_requeridas["pais_residencia"].grid(
+            row = 12, column = 0, sticky = "w", pady = (10, 2)
+        )
 
-        tk.Entry(
+        self.entradas_requeridas["pais_residencia"] = tk.Entry(
             formulario,
             textvariable = self.pais_residencia,
             width = 30
-        ).grid(row = 13, column = 0, sticky = "w")
+        )
+        self.entradas_requeridas["pais_residencia"].grid(
+            row = 13, column = 0, sticky = "w"
+        )
 
 # Campo para ingresar el departamento.
-        tk.Label(
+        self.etiquetas_requeridas["departamento"] = tk.Label(
             formulario,
-            text = "Departamento:",
+            text = "Departamento *:",
             font = ("arial", 10, "bold")
-        ).grid(row = 12, column = 2, sticky = "w", pady = (10, 2))
+        )
+        self.etiquetas_requeridas["departamento"].grid(
+            row = 12, column = 2, sticky = "w", pady = (10, 2)
+        )
 
-        tk.Entry(
+        self.entradas_requeridas["departamento"] = tk.Entry(
             formulario,
             textvariable = self.departamento,
             width = 30
-        ).grid(row = 13, column = 2, sticky = "w")
+        )
+        self.entradas_requeridas["departamento"].grid(
+            row = 13, column = 2, sticky = "w"
+        )
 
 # Campo para ingresar la ciudad o el municipio.
-        tk.Label(
+        self.etiquetas_requeridas["ciudad_municipio"] = tk.Label(
             formulario,
-            text = "Ciudad o Municipio:",
+            text = "Ciudad o municipio *:",
             font = ("arial", 10, "bold")
-        ).grid(row = 14, column = 0, sticky = "w", pady = (10, 2))
+        )
+        self.etiquetas_requeridas["ciudad_municipio"].grid(
+            row = 14, column = 0, sticky = "w", pady = (10, 2)
+        )
 
-        tk.Entry(
+        self.entradas_requeridas["ciudad_municipio"] = tk.Entry(
             formulario,
             textvariable = self.ciudad_municipio,
             width = 30
-        ).grid(row = 15, column = 0, sticky = "w")
+        )
+        self.entradas_requeridas["ciudad_municipio"].grid(
+            row = 15, column = 0, sticky = "w"
+        )
 
 # Campo para ingresar la dirección.
-        tk.Label(
+        self.etiquetas_requeridas["direccion"] = tk.Label(
             formulario,
-            text = "Dirección:",
+            text = "Dirección *:",
             font = ("arial", 10, "bold")
-        ).grid(row = 14, column = 2, sticky = "w", pady = (10, 2))
+        )
+        self.etiquetas_requeridas["direccion"].grid(
+            row = 14, column = 2, sticky = "w", pady = (10, 2)
+        )
 
-        tk.Entry(
+        self.entradas_requeridas["direccion"] = tk.Entry(
             formulario,
             textvariable = self.direccion,
             width = 30
-        ).grid(row = 15, column = 2, sticky = "w")
+        )
+        self.entradas_requeridas["direccion"].grid(
+            row = 15, column = 2, sticky = "w"
+        )
+
+        tk.Label(
+            formulario,
+            text = (
+                "* Campo obligatorio. Segundo nombre y segundo apellido "
+                "son opcionales."
+            ),
+            font = ("arial", 9)
+        ).grid(row = 16, column = 0, columnspan = 3, sticky = "w", pady = (8, 0))
 
 
 # -----------------------------------------------------------------------------------
@@ -537,13 +637,40 @@ class InterfazClientes(tk.Frame):
 # Se obtienen los datos de identificación ingresados en el formulario.
         tipo_documento = self.tipo_documento.get().strip()
         identificacion = self.documento.get().strip()
+        self._Limpiar_Resaltado_Campos()
+
+        faltantes = []
+        if not tipo_documento:
+            faltantes.append("tipo_documento")
+        if not identificacion:
+            faltantes.append("documento")
+        if faltantes:
+            for clave in faltantes:
+                self.etiquetas_requeridas[clave].config(fg="red")
+                if clave == "tipo_documento":
+                    self.entradas_requeridas[clave].configure(
+                        style="CampoInvalido.TCombobox"
+                    )
+                else:
+                    self.entradas_requeridas[clave].configure(bg="#ffe6e6")
+            nombres = [
+                self.etiquetas_requeridas[clave].cget("text").rstrip(" *:")
+                for clave in faltantes
+            ]
+            logger.warning(
+                "Búsqueda de cliente rechazada por campos vacíos: %s",
+                nombres,
+            )
+            self.lbl_resultado.config(
+                text="Complete los campos para la búsqueda: "
+                + ", ".join(nombres)
+                + ".",
+                fg="red",
+            )
+            return
 
         try:
 # El tipo y el número de documento se utilizan para localizar al cliente.
-            if not tipo_documento:
-                raise ErrorIdentificacionClienteInvalida(
-                    "Seleccione el tipo de documento para realizar la búsqueda."
-                )
             cliente = buscar_cliente_por_identificacion(
                 self.lista_clientes,
                 identificacion,
@@ -626,6 +753,9 @@ class InterfazClientes(tk.Frame):
             )
             return
 
+        if not self._Validar_Campos_Obligatorios():
+            return
+
         try:
             self.cliente_encontrado.actualizar_datos(
                 primer_nombre=self.primer_nombre.get(),
@@ -704,9 +834,84 @@ class InterfazClientes(tk.Frame):
 #       MÉTODO PARA REGISTRAR UN CLIENTE
 # ---------------------------------------------------------------------------------------
 
+# Restablece el color normal de las etiquetas y los campos obligatorios.
+    def _Limpiar_Resaltado_Campos(self):
+        for etiqueta in self.etiquetas_requeridas.values():
+            etiqueta.config(fg="black")
+        for clave, entrada in self.entradas_requeridas.items():
+            if clave == "tipo_documento":
+                entrada.configure(style="TCombobox")
+            else:
+                entrada.configure(bg="white")
+
+# Resalta en rojo los campos obligatorios que todavía están vacíos.
+    def _Validar_Campos_Obligatorios(self):
+        self._Limpiar_Resaltado_Campos()
+
+        valores = {
+            "tipo_documento": self.tipo_documento.get().strip(),
+            "documento": self.documento.get().strip(),
+            "primer_nombre": self.primer_nombre.get().strip(),
+            "primer_apellido": self.primer_apellido.get().strip(),
+            "telefono": self.telefono.get().strip(),
+            "correo_electronico": self.correo_electronico.get().strip(),
+            "pais_residencia": self.pais_residencia.get().strip(),
+            "departamento": self.departamento.get().strip(),
+            "ciudad_municipio": self.ciudad_municipio.get().strip(),
+            "direccion": self.direccion.get().strip(),
+        }
+        faltantes = [clave for clave, valor in valores.items() if not valor]
+
+        fecha_faltante = []
+        for clave, variable in (
+            ("anio_nacimiento", self.anio_nacimiento),
+            ("mes_nacimiento", self.mes_nacimiento),
+            ("dia_nacimiento", self.dia_nacimiento),
+        ):
+            if not variable.get().strip():
+                fecha_faltante.append(clave)
+        if fecha_faltante:
+            faltantes.extend(["fecha_nacimiento", *fecha_faltante])
+
+        if not self.genero.get().strip():
+            faltantes.append("genero")
+
+        if faltantes:
+            for clave in faltantes:
+                self.etiquetas_requeridas[clave].config(fg="red")
+                entrada = self.entradas_requeridas.get(clave)
+                if entrada is not None:
+                    if clave == "tipo_documento":
+                        entrada.configure(style="CampoInvalido.TCombobox")
+                    else:
+                        entrada.configure(bg="#ffe6e6")
+
+            nombres = []
+            for clave in dict.fromkeys(faltantes):
+                texto = self.etiquetas_requeridas[clave].cget("text")
+                nombres.append(texto.rstrip(" *:"))
+            self.lbl_resultado.config(
+                text=(
+                    "Complete los campos obligatorios marcados con *: "
+                    + ", ".join(nombres)
+                    + "."
+                ),
+                fg="red",
+            )
+            logger.warning(
+                "Operación de cliente rechazada por campos obligatorios vacíos: %s",
+                nombres,
+            )
+            return False
+
+        return True
+
 # Se valida el formulario y se agrega el cliente a la lista compartida.
 
     def Registrar_Cliente(self):
+        if not self._Validar_Campos_Obligatorios():
+            return
+
         try:
             fecha_nacimiento = self._Obtener_Fecha_Nacimiento()
             cliente = Cliente(
@@ -851,6 +1056,7 @@ class InterfazClientes(tk.Frame):
 
     def Limpiar_Formulario(self):
         self._Restablecer_Modo_Registro()
+        self._Limpiar_Resaltado_Campos()
         self.tipo_documento.set("")
         self.documento.set("")
         self.primer_nombre.set("")
@@ -896,7 +1102,7 @@ def Abrir_Ventana_Clientes(
         ejecutar_bucle = False
 
 # Se configura el tamaño y el comportamiento de la ventana.
-    ventana.geometry("820x700")
+    ventana.geometry("820x730")
     ventana.resizable(False, False)
 
 # Se crea el formulario de clientes y se agrega a la ventana.

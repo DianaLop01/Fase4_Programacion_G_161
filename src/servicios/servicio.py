@@ -9,6 +9,7 @@ Clase abstracta base para los servicios ofrecidos por Software FJ.
 
 # Se importan las herramientas para crear clases abstractas.
 from abc import ABC, abstractmethod
+from math import isfinite
 
 # Se importan las excepciones del dominio de servicios.
 from .excepciones import DatosServicioInvalidos, CostoServicioInvalido
@@ -28,18 +29,56 @@ class Servicio(ABC):
 
     def __init__(self, codigo, nombre, descripcion, precio_base):
 
-        if not codigo or not nombre or not descripcion:
+        if not all(
+            isinstance(valor, str) and valor.strip()
+            for valor in (codigo, nombre, descripcion)
+        ):
             raise DatosServicioInvalidos(
-                "El codigo, nombre y descripcion son obligatorios."
+                "El código, nombre y descripción deben ser textos obligatorios."
             )
 
+        if not self._es_numero_finito(precio_base):
+            raise DatosServicioInvalidos(
+                "El precio base debe ser un valor numérico finito."
+            )
         if precio_base <= 0:
             raise CostoServicioInvalido()
 
-        self.codigo = codigo
-        self.nombre = nombre
-        self.descripcion = descripcion
+        self.codigo = codigo.strip()
+        self.nombre = nombre.strip()
+        self.descripcion = descripcion.strip()
         self.precio_base = precio_base
+
+    # Comprueba que un valor sea numérico, finito y distinto de un booleano.
+    @staticmethod
+    def _es_numero_finito(valor):
+        if not isinstance(valor, (int, float)) or isinstance(valor, bool):
+            return False
+        try:
+            return isfinite(valor)
+        except OverflowError:
+            return False
+
+    # Valida los valores positivos que pueden expresarse con decimales.
+    @classmethod
+    def _validar_numero_positivo(cls, valor, campo):
+        if not cls._es_numero_finito(valor) or valor <= 0:
+            raise DatosServicioInvalidos(
+                f"{campo} debe ser un número finito mayor que cero."
+            )
+
+    # Valida los valores que deben ser números enteros positivos.
+    @classmethod
+    def _validar_entero_positivo(cls, valor, campo):
+        if (
+            not isinstance(valor, int)
+            or isinstance(valor, bool)
+            or not cls._es_numero_finito(valor)
+            or valor <= 0
+        ):
+            raise DatosServicioInvalidos(
+                f"{campo} debe ser un número entero mayor que cero."
+            )
 
     # ---------------------------------------------------------------------------------------
     #       METODO ABSTRACTO PARA CALCULAR EL COSTO
@@ -51,6 +90,11 @@ class Servicio(ABC):
     def Calcular_Costo(self):
         pass
 
+    # Cada servicio especializado valida sus parámetros particulares.
+    @abstractmethod
+    def Validar_Parametros(self):
+        """Valida los parámetros específicos del servicio."""
+
     # Calcula el costo de una reserva aplicando duración y descuento porcentual.
 
     def calcular_costo(self, duracion, descuento=0.0):
@@ -61,8 +105,7 @@ class Servicio(ABC):
             )
 
         if (
-            not isinstance(descuento, (int, float))
-            or isinstance(descuento, bool)
+            not self._es_numero_finito(descuento)
             or not 0 <= descuento < 100
         ):
             raise DatosServicioInvalidos(

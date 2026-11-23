@@ -1,5 +1,6 @@
 """Interfaz gráfica para las operaciones de reservas."""
 
+from math import isfinite
 import os
 import sys
 import tkinter as tk
@@ -43,6 +44,21 @@ class PanelReservas(tk.Frame):
         self._construir_ui()
 
     def _construir_ui(self):
+        self.etiquetas_campos = {}
+        self.campos_reserva = {}
+        estilo = ttk.Style(self)
+        estilo.configure(
+            "CampoInvalido.TCombobox",
+            fieldbackground="#ffe6e6",
+        )
+        estilo.map(
+            "CampoInvalido.TCombobox",
+            fieldbackground=[
+                ("readonly", "#ffe6e6"),
+                ("!disabled", "#ffe6e6"),
+            ],
+        )
+
         form = tk.LabelFrame(
             self,
             text="Gestión de reservas - SoftwareFJ",
@@ -53,38 +69,58 @@ class PanelReservas(tk.Frame):
         )
         form.pack(fill="x", padx=15, pady=10)
 
-        tk.Label(form, text="ID Reserva:", bg="#f4f6f9").grid(
+        self.etiquetas_campos["id"] = tk.Label(
+            form, text="ID Reserva *:", bg="#f4f6f9"
+        )
+        self.etiquetas_campos["id"].grid(
             row=0, column=0, sticky="w", pady=4
         )
         self.ent_id = tk.Entry(form, width=15)
         self.ent_id.grid(row=0, column=1, padx=6, sticky="w")
+        self.campos_reserva["id"] = self.ent_id
 
-        tk.Label(form, text="Cliente:", bg="#f4f6f9").grid(
+        self.etiquetas_campos["cliente"] = tk.Label(
+            form, text="Cliente *:", bg="#f4f6f9"
+        )
+        self.etiquetas_campos["cliente"].grid(
             row=0, column=2, sticky="w", pady=4
         )
         self.cmb_cliente = ttk.Combobox(form, state="readonly", width=30)
         self.cmb_cliente.grid(row=0, column=3, padx=6)
+        self.campos_reserva["cliente"] = self.cmb_cliente
 
-        tk.Label(form, text="Servicio:", bg="#f4f6f9").grid(
+        self.etiquetas_campos["servicio"] = tk.Label(
+            form, text="Servicio *:", bg="#f4f6f9"
+        )
+        self.etiquetas_campos["servicio"].grid(
             row=1, column=0, sticky="w", pady=4
         )
         self.cmb_servicio = ttk.Combobox(form, state="readonly", width=30)
         self.cmb_servicio.grid(row=1, column=1, columnspan=2, padx=6, sticky="w")
+        self.campos_reserva["servicio"] = self.cmb_servicio
 
-        tk.Label(
+        self.etiquetas_campos["duracion"] = tk.Label(
             form,
-            text="Duración (Horas/Días/Sesiones):",
+            text="Duración (Horas/Días/Sesiones) *:",
             bg="#f4f6f9",
-        ).grid(row=1, column=3, sticky="w")
+        )
+        self.etiquetas_campos["duracion"].grid(
+            row=1, column=3, sticky="w"
+        )
         self.ent_duracion = tk.Entry(form, width=12)
         self.ent_duracion.grid(row=1, column=4, padx=6, sticky="w")
+        self.campos_reserva["duracion"] = self.ent_duracion
 
-        tk.Label(form, text="Descuento (%):", bg="#f4f6f9").grid(
+        self.etiquetas_campos["descuento"] = tk.Label(
+            form, text="Descuento (%) (opcional):", bg="#f4f6f9"
+        )
+        self.etiquetas_campos["descuento"].grid(
             row=2, column=0, sticky="w", pady=4
         )
         self.ent_descuento = tk.Entry(form, width=12)
         self.ent_descuento.insert(0, "0")
         self.ent_descuento.grid(row=2, column=1, padx=6, sticky="w")
+        self.campos_reserva["descuento"] = self.ent_descuento
 
         tk.Button(
             form,
@@ -95,6 +131,13 @@ class PanelReservas(tk.Frame):
             padx=10,
             command=self.crear_y_procesar_reserva,
         ).grid(row=2, column=3, columnspan=2, pady=6, sticky="e")
+
+        tk.Label(
+            form,
+            text="* Campo obligatorio. El descuento es opcional.",
+            bg="#f4f6f9",
+            font=("Arial", 9),
+        ).grid(row=3, column=0, columnspan=5, sticky="w", pady=(4, 0))
 
         acciones = tk.Frame(self, bg="#f4f6f9")
         acciones.pack(fill="x", padx=15, pady=5)
@@ -126,8 +169,41 @@ class PanelReservas(tk.Frame):
             command=self.actualizar_datos,
         ).pack(side="right", padx=5)
 
+        self.lbl_resultado = tk.Label(
+            self,
+            text="",
+            bg="#f4f6f9",
+            font=("Arial", 10, "bold"),
+            wraplength=850,
+        )
+        self.lbl_resultado.pack(fill="x", padx=15, pady=(4, 0))
+
         self.listbox_reservas = tk.Listbox(self, font=("consolas", 10), height=14)
         self.listbox_reservas.pack(fill="both", expand=True, padx=15, pady=10)
+
+    def _limpiar_resaltado_campos(self):
+        """Restablece los estilos de los campos después de una corrección."""
+        for etiqueta in self.etiquetas_campos.values():
+            etiqueta.config(fg="black")
+        for clave, campo in self.campos_reserva.items():
+            if clave in ("cliente", "servicio"):
+                campo.configure(style="TCombobox")
+            else:
+                campo.configure(bg="white")
+
+    def _resaltar_campos(self, claves):
+        """Resalta las etiquetas y los controles de los campos inválidos."""
+        for clave in claves:
+            self.etiquetas_campos[clave].config(fg="red")
+            campo = self.campos_reserva[clave]
+            if clave in ("cliente", "servicio"):
+                campo.configure(style="CampoInvalido.TCombobox")
+            else:
+                campo.configure(bg="#ffe6e6")
+
+    def _mostrar_resultado(self, mensaje, color):
+        """Muestra mensajes de validación y resultado en el panel."""
+        self.lbl_resultado.config(text=mensaje, fg=color)
 
     @staticmethod
     def _formatear_reserva(reserva_objeto):
@@ -186,23 +262,56 @@ class PanelReservas(tk.Frame):
 
     def crear_y_procesar_reserva(self):
         creada = False
+        campo_actual = None
+        self._limpiar_resaltado_campos()
         try:
-            if not self.cmb_cliente.get() or not self.cmb_servicio.get():
+            faltantes = []
+            if not self.ent_id.get().strip():
+                faltantes.append("id")
+            if self.cmb_cliente.current() < 0:
+                faltantes.append("cliente")
+            if self.cmb_servicio.current() < 0:
+                faltantes.append("servicio")
+            if not self.ent_duracion.get().strip():
+                faltantes.append("duracion")
+
+            if faltantes:
+                self._resaltar_campos(faltantes)
                 raise ErrorParametroFaltante(
-                    "Debe seleccionar un cliente y un servicio."
+                    "Complete los campos obligatorios marcados con asterisco."
                 )
 
             cliente = self.clientes[self.cmb_cliente.current()]
             servicio = self.servicios[self.cmb_servicio.current()]
 
+            campo_actual = "duracion"
             try:
                 duracion = int(self.ent_duracion.get())
-                descuento = float(self.ent_descuento.get())
-            except (TypeError, ValueError):
+            except (TypeError, ValueError) as error:
                 raise ErrorDatoInvalido(
-                    "Duración y descuento deben ser valores numéricos."
+                    "La duración debe ser un número entero válido."
+                ) from error
+            if duracion <= 0:
+                raise ErrorDatoInvalido(
+                    "La duración debe ser mayor que cero."
                 )
 
+            texto_descuento = self.ent_descuento.get().strip()
+            campo_actual = "descuento"
+            try:
+                descuento = (
+                    float(texto_descuento) if texto_descuento else 0.0
+                )
+            except (TypeError, ValueError) as error:
+                raise ErrorDatoInvalido(
+                    "El descuento debe ser un número válido."
+                ) from error
+            if not isfinite(descuento) or not 0 <= descuento < 100:
+                raise ErrorDatoInvalido(
+                    "El descuento debe estar entre 0 y menos de 100."
+                )
+
+            campo_actual = None
             nueva_reserva = Reserva(
                 identificador=self.ent_id.get().strip(),
                 cliente=cliente,
@@ -215,10 +324,10 @@ class PanelReservas(tk.Frame):
             self.reservas.append(nueva_reserva)
             creada = True
 
-            messagebox.showinfo(
-                "Reserva Procesada",
-                f"Reserva {nueva_reserva.identificador} creada y procesada exitosamente."
-                f"\nTotal: ${nueva_reserva.costo_total:,.2f}",
+            self._mostrar_resultado(
+                f"Reserva {nueva_reserva.identificador} creada y procesada. "
+                f"Total: ${nueva_reserva.costo_total:,.2f}",
+                "green",
             )
             self.ent_id.delete(0, tk.END)
             self.ent_duracion.delete(0, tk.END)
@@ -226,11 +335,15 @@ class PanelReservas(tk.Frame):
             self.ent_descuento.insert(0, "0")
 
         except SoftwareFJExcepcion as e:
-            messagebox.showerror("Error al crear reserva", str(e))
+            if campo_actual:
+                self._resaltar_campos([campo_actual])
+            self._mostrar_resultado(str(e), "red")
         except (TypeError, ValueError, AttributeError) as e:
-            messagebox.showerror("Error al crear reserva", str(e))
+            if campo_actual:
+                self._resaltar_campos([campo_actual])
+            self._mostrar_resultado(str(e), "red")
         except Exception as e:
-            messagebox.showerror("Error al crear reserva", str(e))
+            self._mostrar_resultado(str(e), "red")
         finally:
             self.actualizar_datos()
             if creada:
@@ -242,7 +355,10 @@ class PanelReservas(tk.Frame):
     def confirmar_reserva(self):
         seleccion = self.listbox_reservas.curselection()
         if not seleccion:
-            messagebox.showwarning("Atención", "Seleccione una reserva de la lista.")
+            self._mostrar_resultado(
+                "Seleccione una reserva de la lista.",
+                "red",
+            )
             return
 
         try:
@@ -264,7 +380,10 @@ class PanelReservas(tk.Frame):
     def cancelar_reserva(self):
         seleccion = self.listbox_reservas.curselection()
         if not seleccion:
-            messagebox.showwarning("Atención", "Seleccione una reserva de la lista.")
+            self._mostrar_resultado(
+                "Seleccione una reserva de la lista.",
+                "red",
+            )
             return
 
         try:

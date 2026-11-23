@@ -10,10 +10,6 @@ Servicio especializado para el alquiler de equipos.
 # Se importa la clase abstracta Servicio.
 from .servicio import Servicio
 
-# Se importan las excepciones.
-from .excepciones import DatosServicioInvalidos
-
-
 # ===========================================================================================
 #                       CLASE ALQUILER DE EQUIPOS
 # ===========================================================================================
@@ -30,15 +26,15 @@ class AlquilerEquipos(Servicio):
         # Se inicializan los atributos generales heredados.
         super().__init__(codigo, nombre, descripcion, tarifa_diaria)
 
-        # Se validan los datos especificos del alquiler.
-        if cantidad <= 0 or dias <= 0:
-            raise DatosServicioInvalidos(
-                "La cantidad de equipos y los dias deben ser mayores que cero."
-            )
-
         self.tarifa_diaria = tarifa_diaria
         self.cantidad = cantidad
         self.dias = dias
+        self.Validar_Parametros()
+
+    # Valida la cantidad de equipos y los días del alquiler.
+    def Validar_Parametros(self):
+        self._validar_entero_positivo(self.cantidad, "La cantidad de equipos")
+        self._validar_entero_positivo(self.dias, "Los días de alquiler")
 
     # ---------------------------------------------------------------------------------------
     #       METODO PARA CALCULAR EL COSTO

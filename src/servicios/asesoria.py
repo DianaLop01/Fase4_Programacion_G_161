@@ -10,7 +10,7 @@ Servicio especializado para asesorías.
 # Se importa la clase abstracta Servicio.
 from .servicio import Servicio
 
-# Se importan las excepciones.
+# Se importa la excepción para los parámetros inválidos de la asesoría.
 from .excepciones import DatosServicioInvalidos
 
 
@@ -30,20 +30,21 @@ class Asesoria(Servicio):
         # Se inicializan los atributos heredados.
         super().__init__(codigo, nombre, descripcion, tarifa_hora)
 
-        # Se validan las horas contratadas.
-        if horas <= 0:
-            raise DatosServicioInvalidos(
-                "Las horas de asesoria deben ser mayores que cero."
-            )
-
-        if modalidad not in ("Virtual", "Presencial"):
-            raise DatosServicioInvalidos(
-                "La modalidad debe ser Virtual o Presencial."
-            )
-
         self.tarifa_hora = tarifa_hora
         self.horas = horas
         self.modalidad = modalidad
+        self.Validar_Parametros()
+
+    # Valida las horas contratadas y la modalidad de la asesoría.
+    def Validar_Parametros(self):
+        self._validar_numero_positivo(self.horas, "Las horas de asesoría")
+        if not isinstance(self.modalidad, str) or self.modalidad not in (
+            "Virtual",
+            "Presencial",
+        ):
+            raise DatosServicioInvalidos(
+                "La modalidad debe ser Virtual o Presencial."
+            )
 
     # ---------------------------------------------------------------------------------------
     #       METODO PARA CALCULAR EL COSTO

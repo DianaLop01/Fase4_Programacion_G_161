@@ -10,10 +10,6 @@ Servicio especializado para la reserva de salas.
 # Se importa la clase abstracta Servicio.
 from .servicio import Servicio
 
-# Se importan las excepciones.
-from .excepciones import DatosServicioInvalidos
-
-
 # ===========================================================================================
 #                       CLASE RESERVA DE SALAS
 # ===========================================================================================
@@ -30,15 +26,15 @@ class ReservaSalas(Servicio):
         # Se inicializan los atributos heredados.
         super().__init__(codigo, nombre, descripcion, tarifa_hora)
 
-        # Se validan las horas y la capacidad.
-        if horas <= 0 or capacidad <= 0:
-            raise DatosServicioInvalidos(
-                "Las horas y la capacidad deben ser mayores que cero."
-            )
-
         self.tarifa_hora = tarifa_hora
         self.horas = horas
         self.capacidad = capacidad
+        self.Validar_Parametros()
+
+    # Valida las horas de uso y la capacidad requerida para la sala.
+    def Validar_Parametros(self):
+        self._validar_numero_positivo(self.horas, "Las horas de reserva")
+        self._validar_entero_positivo(self.capacidad, "La capacidad")
 
     # ---------------------------------------------------------------------------------------
     #       METODO PARA CALCULAR EL COSTO
